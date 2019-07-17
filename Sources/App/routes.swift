@@ -1,8 +1,15 @@
 import Vapor
+import Fluent
 
 /// Register your application's routes here.
 public func routes(_ router: Router) throws {
-  router.get("hello") { (req) -> String in
-    return "Hello Partage and welcome to your own server side using Swift!"
-  }
+  
+  let donatedItemsController = DonatedItemsController()
+  try router.register(collection: donatedItemsController)
+  
+  let usersController = UsersController()
+  try router.register(collection: usersController)
+  
+  let messagesController = MessagesController()
+  try router.register(collection: messagesController)
 }
