@@ -1,5 +1,6 @@
 import Vapor
 import Fluent
+import Authentication
 
 //MARK: - Donated items routes
 struct DonatedItemsController: RouteCollection {
@@ -7,17 +8,31 @@ struct DonatedItemsController: RouteCollection {
   func boot(router: Router) throws {
     let donatedItemsRoutes = router.grouped("api", "donatedItems")
     
-    donatedItemsRoutes.post(DonatedItem.self, use: createHandler)
     donatedItemsRoutes.get(use: getAllHandler)
     donatedItemsRoutes.get(DonatedItem.parameter, use: getHandler)
-    donatedItemsRoutes.put(DonatedItem.parameter, use: updateHandler)
-    donatedItemsRoutes.delete(DonatedItem.parameter, use: deleteHandler)
     donatedItemsRoutes.get("search", use: searchHandler)
     donatedItemsRoutes.get(DonatedItem.parameter, "user", use: getUserHandler)
+    
+    //MARK: - Protect the path for only authenticate user can save a donated item
+    let tokenAuthMiddleware = User.tokenAuthMiddleware()
+    let guardAuthMiddleware = User.guardAuthMiddleware()
+    let tokenAuthGroup = donatedItemsRoutes.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+    tokenAuthGroup.post(DonatedItemCreateData.self, use: createHandler)
+    tokenAuthGroup.delete(DonatedItem.parameter, use: deleteHandler)
+    tokenAuthGroup.put(DonatedItem.parameter, use: updateHandler)
   }
   
   //MARK: - Create a donated item
-  func createHandler(_ req: Request, donatedItem: DonatedItem) throws -> Future<DonatedItem> {
+  func createHandler(_ req: Request, data: DonatedItemCreateData) throws -> Future<DonatedItem> {
+    let user = try req.requireAuthenticated(User.self)
+    let donatedItem = try DonatedItem(
+      selectedType: data.selectedType,
+      name: data.name,
+      pickUpDateTime: data.pickUpDateTime,
+      description: data.description,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      donorID: user.requireID())
     return donatedItem.save(on: req)
   }
   
@@ -33,14 +48,16 @@ struct DonatedItemsController: RouteCollection {
   
   //MARK: - Update one donated item
   func updateHandler(_ req: Request) throws -> Future<DonatedItem> {
-    return try flatMap(to: DonatedItem.self, req.parameters.next(DonatedItem.self), req.content.decode(DonatedItem.self), { (donatedItem, updateDonatedItem) in
+    return try flatMap(to: DonatedItem.self, req.parameters.next(DonatedItem.self), req.content.decode(DonatedItemCreateData.self), { (donatedItem, updateDonatedItem) in
       donatedItem.selectedType = updateDonatedItem.selectedType
       donatedItem.name = updateDonatedItem.name
       donatedItem.pickUpDateTime = updateDonatedItem.pickUpDateTime
       donatedItem.description = updateDonatedItem.description
       donatedItem.latitude = updateDonatedItem.latitude
       donatedItem.longitude = updateDonatedItem.longitude
-      donatedItem.donorID = updateDonatedItem.donorID
+      
+      let user = try req.requireAuthenticated(User.self)
+      donatedItem.donorID = try user.requireID()
       return donatedItem.save(on: req)
     })
   }
@@ -65,11 +82,21 @@ struct DonatedItemsController: RouteCollection {
   }
   
   //MARK: - Get the donor associated to the item
-  func getUserHandler(_ req: Request) throws -> Future<User> {
+  func getUserHandler(_ req: Request) throws -> Future<User.Public> {
     return try req
     .parameters.next(DonatedItem.self)
-      .flatMap(to: User.self, { (donatedItem) in
-        donatedItem.user.get(on: req)
+      .flatMap(to: User.Public.self, { (donatedItem) in
+        donatedItem.user.get(on: req).convertToPublic()
       })
   }
+}
+
+//MARK: - Defines the request data a user has to send to create an item
+struct DonatedItemCreateData: Content {
+  let selectedType: String
+  let name: String
+  let pickUpDateTime: String
+  let description: String
+  let latitude: Double
+  let longitude: Double
 }

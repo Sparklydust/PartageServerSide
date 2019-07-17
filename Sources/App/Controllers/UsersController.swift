@@ -1,4 +1,5 @@
 import Vapor
+import Crypto
 
 struct UsersController: RouteCollection {
   
@@ -9,18 +10,23 @@ struct UsersController: RouteCollection {
     usersRoute.get(use: getAllHandler)
     usersRoute.get(User.parameter, use: getHandler)
     usersRoute.get(User.parameter, "donatedItems", use: getDonatedItemsHandler)
+    
+    let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
+    let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
+    basicAuthGroup.post("login", use: loginHandler)
   }
   
-  func createHandler(_ req: Request, user: User) throws -> Future<User> {
-    return user.save(on: req)
+  func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {
+    user.password = try BCrypt.hash(user.password)
+    return user.save(on: req).convertToPublic()
   }
   
-  func getAllHandler(_ req: Request) throws -> Future<[User]> {
-    return User.query(on: req).all()
+  func getAllHandler(_ req: Request) throws -> Future<[User.Public]> {
+    return User.query(on: req).decode(data: User.Public.self).all()
   }
   
-  func getHandler(_ req: Request) throws -> Future<User> {
-    return try req.parameters.next(User.self)
+  func getHandler(_ req: Request) throws -> Future<User.Public> {
+    return try req.parameters.next(User.self).convertToPublic()
   }
   
   func getDonatedItemsHandler(_ req: Request) throws -> Future<[DonatedItem]> {
@@ -29,5 +35,11 @@ struct UsersController: RouteCollection {
       .flatMap(to: [DonatedItem].self, { (user) in
         try user.donatedItems.query(on: req).all()
       })
+  }
+  
+  func loginHandler(_ req: Request) throws -> Future<Token> {
+    let user = try req.requireAuthenticated(User.self)
+    let token = try Token.generate(for: user)
+    return token.save(on: req)
   }
 }
