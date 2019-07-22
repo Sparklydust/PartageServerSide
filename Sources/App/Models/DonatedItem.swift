@@ -36,7 +36,7 @@ extension DonatedItem: Migration {
   static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
     return Database.create(self, on: connection, closure: { (builder) in
       try addProperties(to: builder)
-      builder.reference(from: \.donorID, to: \User.id)
+      builder.reference(from: \.donorID, to: \User.id, onUpdate: .cascade, onDelete: .cascade)
     })
   }
 }

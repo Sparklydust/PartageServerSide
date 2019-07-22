@@ -11,7 +11,6 @@ struct DonatedItemsController: RouteCollection {
     donatedItemsRoutes.get(use: getAllHandler)
     donatedItemsRoutes.get(DonatedItem.parameter, use: getHandler)
     donatedItemsRoutes.get("search", use: searchHandler)
-    donatedItemsRoutes.get(DonatedItem.parameter, "user", use: getUserHandler)
     
     //MARK: - Protect the path for only authenticate user can save a donated item
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -20,6 +19,7 @@ struct DonatedItemsController: RouteCollection {
     tokenAuthGroup.post(DonatedItemCreateData.self, use: createHandler)
     tokenAuthGroup.delete(DonatedItem.parameter, use: deleteHandler)
     tokenAuthGroup.put(DonatedItem.parameter, use: updateHandler)
+    tokenAuthGroup.get(DonatedItem.parameter, "user", use: getUserHandler)
   }
   
   //MARK: - Create a donated item
@@ -84,7 +84,7 @@ struct DonatedItemsController: RouteCollection {
   //MARK: - Get the donor associated to the item
   func getUserHandler(_ req: Request) throws -> Future<User.Public> {
     return try req
-    .parameters.next(DonatedItem.self)
+      .parameters.next(DonatedItem.self)
       .flatMap(to: User.Public.self, { (donatedItem) in
         donatedItem.user.get(on: req).convertToPublic()
       })

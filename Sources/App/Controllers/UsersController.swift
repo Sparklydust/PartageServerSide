@@ -7,13 +7,14 @@ struct UsersController: RouteCollection {
     let usersRoute = router.grouped("api", "users")
     
     usersRoute.post(User.self, use: createHandler)
-    usersRoute.get(use: getAllHandler)
-    usersRoute.get(User.parameter, use: getHandler)
-    usersRoute.get(User.parameter, "donatedItems", use: getDonatedItemsHandler)
     
     let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
     let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
     basicAuthGroup.post("login", use: loginHandler)
+    basicAuthGroup.delete("delete", User.parameter, use: deleteHandler)
+    basicAuthGroup.get(User.parameter, "donatedItems", use: getDonatedItemsHandler)
+    basicAuthGroup.get(User.parameter, use: getHandler)
+    basicAuthGroup.get(use: getAllHandler)
   }
   
   func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {
@@ -31,7 +32,7 @@ struct UsersController: RouteCollection {
   
   func getDonatedItemsHandler(_ req: Request) throws -> Future<[DonatedItem]> {
     return try req
-    .parameters.next(User.self)
+      .parameters.next(User.self)
       .flatMap(to: [DonatedItem].self, { (user) in
         try user.donatedItems.query(on: req).all()
       })
@@ -41,5 +42,13 @@ struct UsersController: RouteCollection {
     let user = try req.requireAuthenticated(User.self)
     let token = try Token.generate(for: user)
     return token.save(on: req)
+  }
+  
+  func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    return try req
+      .parameters
+      .next(User.self)
+      .delete(on: req)
+      .transform(to: .noContent)
   }
 }

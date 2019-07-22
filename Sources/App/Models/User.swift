@@ -80,7 +80,7 @@ struct AdminUser: Migration {
     guard let hashedPassword = password else {
       fatalError("Failed to create admin user")
     }
-    let user = User(firstName: "admin", lastName: "admin", email: "admin@partage.com", password: hashedPassword)
+    let user = User(firstName: "admin", lastName: "admin", email: "roland.sound@live.fr", password: hashedPassword)
     return user.save(on: connection).transform(to: ())
   }
   
