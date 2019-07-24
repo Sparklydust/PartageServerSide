@@ -24,17 +24,20 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   let databaseConfig = PostgreSQLDatabaseConfig(hostname: "localhost",
                                                 username: "Sparklydust",
                                                 database: "PartageServerSide",
-                                                password: "E87Lp6y3eMAGbkTBKt9PGwsAi")
+                                                password: "E87Lp6y3eMAGbkTBKt9PGwsAi"
+  )
   let database = PostgreSQLDatabase(config: databaseConfig)
   databases.add(database: database, as: .psql)
   services.register(databases)
   
   // Configure migrations
   var migrations = MigrationConfig()
+  
   migrations.add(model: User.self, database: .psql)
   migrations.add(model: DonatedItem.self, database: .psql)
   migrations.add(model: Message.self, database: .psql)
   migrations.add(model: Token.self, database: .psql)
+  migrations.add(model: ItemsUserPivot.self, database: .psql)
   
   migrations.add(migration: AdminUser.self, database: .psql)
   

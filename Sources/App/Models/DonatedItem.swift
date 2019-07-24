@@ -3,6 +3,7 @@ import FluentPostgreSQL
 
 final class DonatedItem: Codable {
   var id: Int?
+  var isPicked: Bool
   var selectedType: String
   var name: String
   var pickUpDateTime: String
@@ -11,7 +12,8 @@ final class DonatedItem: Codable {
   var longitude: Double
   var donorID: User.ID
   
-  init(selectedType: String, name: String, pickUpDateTime: String, description: String, latitude: Double, longitude: Double, donorID: User.ID) {
+  init(isPicked: Bool, selectedType: String, name: String, pickUpDateTime: String, description: String, latitude: Double, longitude: Double, donorID: User.ID) {
+    self.isPicked = isPicked
     self.selectedType = selectedType
     self.name = name
     self.pickUpDateTime = pickUpDateTime
@@ -29,6 +31,10 @@ extension DonatedItem: Parameter {}
 extension DonatedItem {
   var user: Parent<DonatedItem, User> {
     return parent(\.donorID)
+  }
+  
+  var userReceiver: Siblings<DonatedItem, User, ItemsUserPivot> {
+    return siblings()
   }
 }
 

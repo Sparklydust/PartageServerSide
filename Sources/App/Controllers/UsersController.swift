@@ -15,6 +15,7 @@ struct UsersController: RouteCollection {
     basicAuthGroup.get(User.parameter, "donatedItems", use: getDonatedItemsHandler)
     basicAuthGroup.get(User.parameter, use: getHandler)
     basicAuthGroup.get(use: getAllHandler)
+    basicAuthGroup.get(User.parameter, "receivedItems", use: getReceivedItemsHandler)
   }
   
   func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {
@@ -50,5 +51,12 @@ struct UsersController: RouteCollection {
       .next(User.self)
       .delete(on: req)
       .transform(to: .noContent)
+  }
+  
+  func getReceivedItemsHandler(_ req: Request) throws -> Future<[DonatedItem]> {
+    return try req.parameters.next(User.self)
+      .flatMap(to: [DonatedItem].self, { (user) in
+        try user.receivedItems.query(on: req).all()
+      })
   }
 }

@@ -38,6 +38,10 @@ extension User {
   var donatedItems: Children<User, DonatedItem> {
     return children(\.donorID)
   }
+  
+  var receivedItems: Siblings<User, DonatedItem, ItemsUserPivot> {
+    return siblings()
+  }
 }
 
 extension User: Migration {
