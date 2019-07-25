@@ -39,7 +39,7 @@ extension User {
     return children(\.donorID)
   }
   
-  var receivedItems: Siblings<User, DonatedItem, ItemsUserPivot> {
+  var itemFavorited: Siblings<User, DonatedItem, FavoritedItemsUsersPivot> {
     return siblings()
   }
 }

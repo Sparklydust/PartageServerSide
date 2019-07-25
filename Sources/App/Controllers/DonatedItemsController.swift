@@ -20,9 +20,9 @@ struct DonatedItemsController: RouteCollection {
     tokenAuthGroup.delete(DonatedItem.parameter, use: deleteHandler)
     tokenAuthGroup.put(DonatedItem.parameter, use: updateHandler)
     tokenAuthGroup.get(DonatedItem.parameter, "user", use: getUserHandler)
-    tokenAuthGroup.post(DonatedItem.parameter, "userReceiver", User.parameter, use: addUserReceiverHandler)
-    tokenAuthGroup.get(DonatedItem.parameter, "userReceiver", use: getUserReceiverHandler)
-    tokenAuthGroup.delete(DonatedItem.parameter, "userReceiver", User.parameter, use: removeUserReceiverHandler)
+    tokenAuthGroup.post(DonatedItem.parameter, "favoritedByUser", User.parameter, use: addUserFavoritedItemHandler)
+    tokenAuthGroup.get(DonatedItem.parameter, "favoritedByUser", use: getUserFavoritedItemHandler)
+    tokenAuthGroup.delete(DonatedItem.parameter, "favoritedByUser", User.parameter, use: removeUserFavoritedItemHandler)
   }
   
   //MARK: - Create a donated item
@@ -36,7 +36,8 @@ struct DonatedItemsController: RouteCollection {
       description: data.description,
       latitude: data.latitude,
       longitude: data.longitude,
-      donorID: user.requireID())
+      donorID: user.requireID()
+    )
     return donatedItem.save(on: req)
   }
   
@@ -95,31 +96,31 @@ struct DonatedItemsController: RouteCollection {
       })
   }
   
-  //MARK: - Set up the relationship between an donated item and an user receiver
-  func addUserReceiverHandler(_ req: Request) throws -> Future<HTTPStatus> {
+  //MARK: - Set up the relationship between an donated item and an user that favorite it
+  func addUserFavoritedItemHandler(_ req: Request) throws -> Future<HTTPStatus> {
     return try flatMap(
       to: HTTPStatus.self,
       req.parameters.next(DonatedItem.self),
-      req.parameters.next(User.self), { (donatedItem, receiver) in
-        return donatedItem.userReceiver
-          .attach(receiver, on: req)
+      req.parameters.next(User.self), { (itemFavorited, user) in
+        return itemFavorited.favoritedByUser
+          .attach(user, on: req)
           .transform(to: .created)
     })
   }
 
-  //MARK: - Query the relationship between a donated item and an user receiver
-  func getUserReceiverHandler(_ req: Request) throws -> Future<[User]> {
+  //MARK: - Query the relationship between a donated item and an user that favorite it
+  func getUserFavoritedItemHandler(_ req: Request) throws -> Future<[User]> {
     return try req.parameters.next(DonatedItem.self)
-      .flatMap(to: [User].self, { (donatedItem) in
-        try donatedItem.userReceiver.query(on: req).all()
+      .flatMap(to: [User].self, { (itemFavorited) in
+        try itemFavorited.favoritedByUser.query(on: req).all()
       })
   }
 
-  //MARK: - Removing the relationship between a donated item and an user receiver
-  func removeUserReceiverHandler(_ req: Request) throws -> Future<HTTPStatus> {
-    return try flatMap(to: HTTPStatus.self, req.parameters.next(DonatedItem.self), req.parameters.next(User.self), { (donatedItem, userReceiver) in
-      return donatedItem.userReceiver
-        .detach(userReceiver, on: req)
+  //MARK: - Removing the relationship between a donated item and an user that favorite it
+  func removeUserFavoritedItemHandler(_ req: Request) throws -> Future<HTTPStatus> {
+    return try flatMap(to: HTTPStatus.self, req.parameters.next(DonatedItem.self), req.parameters.next(User.self), { (itemFavorited, user) in
+      return itemFavorited.favoritedByUser
+        .detach(user, on: req)
         .transform(to: .noContent)
     })
   }
