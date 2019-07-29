@@ -15,7 +15,7 @@ struct UsersController: RouteCollection {
     basicAuthGroup.get(User.parameter, "donatedItems", use: getDonatedItemsHandler)
     basicAuthGroup.get(User.parameter, use: getHandler)
     basicAuthGroup.get(use: getAllHandler)
-    basicAuthGroup.get(User.parameter, "itemFavorited", use: getFavoritedItemsHandler)
+    basicAuthGroup.get(User.parameter, "itemsFavorited", use: getFavoritedItemsHandler)
   }
   
   func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {

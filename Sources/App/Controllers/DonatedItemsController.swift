@@ -23,6 +23,7 @@ struct DonatedItemsController: RouteCollection {
     tokenAuthGroup.post(DonatedItem.parameter, "favoritedByUser", User.parameter, use: addUserFavoritedItemHandler)
     tokenAuthGroup.get(DonatedItem.parameter, "favoritedByUser", use: getUserFavoritedItemHandler)
     tokenAuthGroup.delete(DonatedItem.parameter, "favoritedByUser", User.parameter, use: removeUserFavoritedItemHandler)
+    tokenAuthGroup.get("isReceivedBy", String.parameter, use: getUserItemsReceivedHandler)
   }
   
   //MARK: - Create a donated item
@@ -61,9 +62,10 @@ struct DonatedItemsController: RouteCollection {
       donatedItem.description = updateDonatedItem.description
       donatedItem.latitude = updateDonatedItem.latitude
       donatedItem.longitude = updateDonatedItem.longitude
+      donatedItem.receiverID = updateDonatedItem.receiverID
       
-      let user = try req.requireAuthenticated(User.self)
-      donatedItem.donorID = try user.requireID()
+//      let user = try req.requireAuthenticated(User.self)
+//      donatedItem.donorID = try user.requireID()
       return donatedItem.save(on: req)
     })
   }
@@ -124,6 +126,13 @@ struct DonatedItemsController: RouteCollection {
         .transform(to: .noContent)
     })
   }
+  
+  //MARK: - Get all items that an user has picked up
+  func getUserItemsReceivedHandler(_ req: Request) throws -> Future<[DonatedItem]> {
+    let receiverID = try req.parameters.next(String.self)
+    return DonatedItem.query(on: req)
+      .filter(\DonatedItem.receiverID == receiverID).all()
+  }
 }
 
 //MARK: - Defines the request data a user has to send to create an item
@@ -135,4 +144,5 @@ struct DonatedItemCreateData: Content {
   let description: String
   let latitude: Double
   let longitude: Double
+  let receiverID: String
 }

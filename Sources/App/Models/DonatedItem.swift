@@ -11,8 +11,9 @@ final class DonatedItem: Codable {
   var latitude: Double
   var longitude: Double
   var donorID: User.ID
+  var receiverID: String?
   
-  init(isPicked: Bool, selectedType: String, name: String, pickUpDateTime: String, description: String, latitude: Double, longitude: Double, donorID: User.ID) {
+  init(isPicked: Bool, selectedType: String, name: String, pickUpDateTime: String, description: String, latitude: Double, longitude: Double, donorID: User.ID, receiverID: String? = String()) {
     self.isPicked = isPicked
     self.selectedType = selectedType
     self.name = name
@@ -21,6 +22,7 @@ final class DonatedItem: Codable {
     self.latitude = latitude
     self.longitude = longitude
     self.donorID = donorID
+    self.receiverID = receiverID
   }
 }
 
