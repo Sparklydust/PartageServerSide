@@ -11,6 +11,7 @@ struct DonatedItemsController: RouteCollection {
     donatedItemsRoutes.get(use: getAllHandler)
     donatedItemsRoutes.get(DonatedItem.parameter, use: getHandler)
     donatedItemsRoutes.get("search", use: searchHandler)
+    donatedItemsRoutes.get(DonatedItem.parameter, "user", use: getUserHandler)
     
     //MARK: - Protect the path for only authenticate user can save a donated item
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -19,7 +20,6 @@ struct DonatedItemsController: RouteCollection {
     tokenAuthGroup.post(DonatedItemCreateData.self, use: createHandler)
     tokenAuthGroup.delete(DonatedItem.parameter, use: deleteHandler)
     tokenAuthGroup.put(DonatedItem.parameter, use: updateHandler)
-    tokenAuthGroup.get(DonatedItem.parameter, "user", use: getUserHandler)
     tokenAuthGroup.post(DonatedItem.parameter, "favoritedByUser", User.parameter, use: addUserFavoritedItemHandler)
     tokenAuthGroup.get(DonatedItem.parameter, "favoritedByUser", use: getUserFavoritedItemHandler)
     tokenAuthGroup.delete(DonatedItem.parameter, "favoritedByUser", User.parameter, use: removeUserFavoritedItemHandler)

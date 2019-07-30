@@ -1,5 +1,6 @@
 import Vapor
 import Crypto
+import Authentication
 
 struct UsersController: RouteCollection {
   

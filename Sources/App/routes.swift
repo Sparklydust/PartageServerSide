@@ -12,4 +12,7 @@ public func routes(_ router: Router) throws {
   
   let messagesController = MessagesController()
   try router.register(collection: messagesController)
+  
+  let websiteController = WebsiteController()
+  try router.register(collection: websiteController)
 }
