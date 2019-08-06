@@ -64,8 +64,6 @@ struct DonatedItemsController: RouteCollection {
       donatedItem.longitude = updateDonatedItem.longitude
       donatedItem.receiverID = updateDonatedItem.receiverID
       
-//      let user = try req.requireAuthenticated(User.self)
-//      donatedItem.donorID = try user.requireID()
       return donatedItem.save(on: req)
     })
   }

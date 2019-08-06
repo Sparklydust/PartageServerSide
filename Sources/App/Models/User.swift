@@ -9,12 +9,14 @@ final class User: Codable {
   var lastName: String
   var email: String
   var password: String
+  var profilePicture: String?
   
-  init(firstName: String, lastName: String, email: String, password: String) {
+  init(firstName: String, lastName: String, email: String, password: String, profilePicture: String? = nil) {
     self.firstName = firstName
     self.lastName = lastName
     self.email = email
     self.password = password
+    self.profilePicture = profilePicture
   }
   
   final class Public: Codable {
@@ -93,5 +95,5 @@ struct AdminUser: Migration {
   }
 }
 
-extension User: PasswordAuthenticatable {}
-extension User: SessionAuthenticatable {}
+//extension User: PasswordAuthenticatable {}
+//extension User: SessionAuthenticatable {}

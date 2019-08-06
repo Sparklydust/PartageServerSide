@@ -4,20 +4,18 @@ import FluentPostgreSQL
 final class Message: Codable {
   var id: Int?
   var itemID: Int
-  var isReadByDonor: Bool
-  var isReadByReceiver: Bool
-  var sendDateTime: [Date]
-  var body: [String]
-  var donorID: String?
-  var receiverID: String?
+  var isReadByReceiver: Bool?
+  var sendDateTime: Date
+  var body: String
+  var senderID: String
+  var receiverID: String
   
-  init(itemID: Int, isReadByDonor: Bool, isReadByReceiver: Bool, sendDateTime: [Date], body: [String], donorID: String? = String(), receiverID: String = String()) {
+  init(itemID: Int, isReadByReceiver: Bool? = false, sendDateTime: Date, body: String, senderID: String, receiverID: String) {
     self.itemID = itemID
-    self.isReadByDonor = isReadByDonor
     self.isReadByReceiver = isReadByReceiver
     self.sendDateTime = sendDateTime
     self.body = body
-    self.donorID = donorID
+    self.senderID = senderID
     self.receiverID = receiverID
   }
 }

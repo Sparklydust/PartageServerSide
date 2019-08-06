@@ -14,6 +14,7 @@ let package = Package(
     .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0"),
     .package(url: "https://github.com/vapor/leaf.git", from: "3.0.0"),
     .package(url: "https://github.com/vapor/auth.git", from: "2.0.0"),
+    .package(url: "https://github.com/LiveUI/S3.git", from: "3.0.0-RC3.2"),
     .package(url: "https://github.com/vapor-community/sendgrid-provider.git", from: "3.0.0")
   ],
   
@@ -22,10 +23,10 @@ let package = Package(
                                         "Vapor",
                                         "Leaf",
                                         "Authentication",
+                                        "S3",
                                         "SendGrid"]),
     
     .target(name: "Run", dependencies: ["App"]),
     .testTarget(name: "AppTests", dependencies: ["App"])
   ]
 )
-

@@ -2,6 +2,7 @@ import FluentPostgreSQL
 import Vapor
 import Leaf
 import Authentication
+import S3
 import SendGrid
 
 /// Called before your application initializes.
@@ -11,6 +12,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   try services.register(LeafProvider())
   try services.register(AuthenticationProvider())
   try services.register(SendGridProvider())
+  try services.register(s3: S3Signer.Config(accessKey: "AKIAYSE6L7UH4GZWNJZZ",
+                                            secretKey: "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",
+                                            region: .euWest3), defaultBucket: "partage2files")
   
   // Register routes to the router
   let router = EngineRouter.default()
@@ -25,10 +29,26 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   
   // Configure a database
   var databases = DatabasesConfig()
+  
+  let databaseName: String
+  let databasePort: Int
+  let password: String
+  
+  if (env == .testing) {
+    databaseName = "PartageServerSide-test"
+    databasePort = 5433
+    password = "password"
+  }
+  else {
+    databaseName = "PartageServerSide"
+    databasePort = 5432
+    password = "E87Lp6y3eMAGbkTBKt9PGwsAi"
+  }
   let databaseConfig = PostgreSQLDatabaseConfig(hostname: "localhost",
+                                                port: databasePort,
                                                 username: "Sparklydust",
-                                                database: "PartageServerSide",
-                                                password: "E87Lp6y3eMAGbkTBKt9PGwsAi"
+                                                database: databaseName,
+                                                password: password
   )
   let database = PostgreSQLDatabase(config: databaseConfig)
   databases.add(database: database, as: .psql)
@@ -48,10 +68,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   
   config.prefer(LeafRenderer.self, for: ViewRenderer.self)
   
-//  // Configure SendGrid email sender provider service
-//  guard let sendGridAPIKey = Environment.get("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") else {
-//    fatalError("No SendGrid API Key specified")
-//  }
-//  let sendGridConfig = SendGridConfig(apiKey: sendGridAPIKey)
-//  services.register(sendGridConfig)
+  var commandConfig = CommandConfig.default()
+  commandConfig.useFluentCommands()
+  services.register(commandConfig)
+  
+  // Configure SendGrid email sender provider service
+  let sendGridConfig = SendGridConfig(apiKey: "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")
+  services.register(sendGridConfig)
 }
