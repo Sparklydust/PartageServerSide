@@ -1,7 +1,7 @@
 import Vapor
 import Fluent
 
-/// Register your application's routes here.
+// Register application's routes here.
 public func routes(_ router: Router) throws {
   
   let donatedItemsController = DonatedItemsController()
@@ -13,6 +13,22 @@ public func routes(_ router: Router) throws {
   let messagesController = MessagesController()
   try router.register(collection: messagesController)
   
+  let chatMessagesController = ChatMessagesController()
+  try router.register(collection: chatMessagesController)
+  
   let websiteController = WebsiteController()
   try router.register(collection: websiteController)
+}
+
+// Register application's web socket routes here.
+public func socketRoutes(_ socketServer: NIOWebSocketServer) throws {
+  
+  socketServer.get("echo") { (ws, req) in
+    print("ws connected")
+    
+    ws.onText({ (ws, text) in
+      print("ws received: \(text)")
+      ws.send("echo - \(text)")
+    })
+  }
 }

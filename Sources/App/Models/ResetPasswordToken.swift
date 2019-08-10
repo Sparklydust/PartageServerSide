@@ -12,6 +12,7 @@ final class ResetPasswordToken: Codable {
 }
 
 extension ResetPasswordToken: PostgreSQLUUIDModel {}
+
 extension ResetPasswordToken: Migration {
   static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
     return Database.create(self, on: connection) { builder in
@@ -21,6 +22,7 @@ extension ResetPasswordToken: Migration {
   }
 }
 
+//MARK: - Create the parent relationship
 extension ResetPasswordToken {
   var user: Parent<ResetPasswordToken, User> {
     return parent(\.userID)

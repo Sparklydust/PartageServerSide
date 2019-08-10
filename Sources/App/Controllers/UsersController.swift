@@ -13,6 +13,7 @@ struct UsersController: RouteCollection {
     
     let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
     let basicAuthGroup = usersRoute.grouped(basicAuthMiddleware)
+    
     basicAuthGroup.post("login", use: loginHandler)
     basicAuthGroup.delete("delete", User.parameter, use: deleteHandler)
     basicAuthGroup.get(User.parameter, "donatedItems", use: getDonatedItemsHandler)

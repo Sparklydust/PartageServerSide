@@ -13,10 +13,11 @@ struct DonatedItemsController: RouteCollection {
     donatedItemsRoutes.get("search", use: searchHandler)
     donatedItemsRoutes.get(DonatedItem.parameter, "user", use: getUserHandler)
     
-    //MARK: - Protect the path for only authenticate user can save a donated item
+    //MARK: - Protect the path for only authenticate users can use a donated item
     let tokenAuthMiddleware = User.tokenAuthMiddleware()
     let guardAuthMiddleware = User.guardAuthMiddleware()
     let tokenAuthGroup = donatedItemsRoutes.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+    
     tokenAuthGroup.post(DonatedItemCreateData.self, use: createHandler)
     tokenAuthGroup.delete(DonatedItem.parameter, use: deleteHandler)
     tokenAuthGroup.put(DonatedItem.parameter, use: updateHandler)

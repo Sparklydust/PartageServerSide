@@ -30,6 +30,7 @@ extension DonatedItem: PostgreSQLModel {}
 extension DonatedItem: Content {}
 extension DonatedItem: Parameter {}
 
+//MARK: - Setting up parent and sibling relationship 
 extension DonatedItem {
   var user: Parent<DonatedItem, User> {
     return parent(\.donorID)
@@ -40,6 +41,7 @@ extension DonatedItem {
   }
 }
 
+//MARK: - To delete or update an item on cascade
 extension DonatedItem: Migration {
   static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
     return Database.create(self, on: connection, closure: { (builder) in

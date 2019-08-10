@@ -36,9 +36,14 @@ extension User: Parameter {}
 
 extension User.Public: Content {}
 
+//MARK: - Setting up children and sibling relationship
 extension User {
   var donatedItems: Children<User, DonatedItem> {
     return children(\.donorID)
+  }
+  
+  var messages: Children<User, Message> {
+    return children(\.createdBy)
   }
   
   var itemFavorited: Siblings<User, DonatedItem, FavoritedItemsUsersPivot> {
@@ -46,6 +51,7 @@ extension User {
   }
 }
 
+//MARK: - Creating an unique email in the database
 extension User: Migration {
   static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
     return Database.create(self, on: connection, closure: { (builder) in
@@ -55,12 +61,14 @@ extension User: Migration {
   }
 }
 
+//MARK: - Convert User to a public mode
 extension User {
   func convertToPublic() -> User.Public {
     return User.Public(id: id, firstName: firstName)
   }
 }
 
+//MARK: - Convert User to a public mode
 extension Future where T: User {
   func convertToPublic() -> Future<User.Public> {
     return self.map(to: User.Public.self, { (user) in
@@ -69,15 +77,18 @@ extension Future where T: User {
   }
 }
 
+//MARK: - Used to authenticate the user
 extension User: BasicAuthenticatable {
   static let usernameKey: UsernameKey = \User.email
   static let passwordKey: PasswordKey = \User.password
 }
 
+//MARK: - Token authentication
 extension User: TokenAuthenticatable {
   typealias TokenType = Token 
 }
 
+//MARK: - Creation of the admin user
 struct AdminUser: Migration {
   typealias Database = PostgreSQLDatabase
   
@@ -94,6 +105,3 @@ struct AdminUser: Migration {
     return .done(on: connection)
   }
 }
-
-//extension User: PasswordAuthenticatable {}
-//extension User: SessionAuthenticatable {}

@@ -17,6 +17,7 @@ final class Token: Codable {
 extension Token: PostgreSQLUUIDModel {}
 extension Token: Content {}
 
+//MARK: - To delete or update an item on cascade
 extension Token: Migration {
   static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
     return Database.create(self, on: connection, closure: { (builder) in
@@ -26,6 +27,7 @@ extension Token: Migration {
   }
 }
 
+//MARK: - To generate a token for an user
 extension Token {
   static func generate(for user: User) throws -> Token {
     let random = try CryptoRandom().generateData(count: 16)
@@ -33,11 +35,13 @@ extension Token {
   }
 }
 
+//MARK: - Define the userID ey on token
 extension Token: Authentication.Token {
   static let userIDKey: UserIDKey = \Token.userID
   typealias UserType = User
 }
 
+//MARK: - To user token with bearer authenticatable
 extension Token: BearerAuthenticatable {
   static let tokenKey: TokenKey = \Token.token
 }

@@ -21,6 +21,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   try routes(router)
   services.register(router, as: Router.self)
   
+  // Register routes to the web socket server
+  let wss = NIOWebSocketServer.default()
+  try socketRoutes(wss)
+  services.register(wss, as: WebSocketServer.self)
+  
   // Register middleware
   var middlewares = MiddlewareConfig() // Create _empty_ middleware config
   // middlewares.use(FileMiddleware.self) // Serves files from `Public/` directory
@@ -60,6 +65,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   migrations.add(model: User.self, database: .psql)
   migrations.add(model: DonatedItem.self, database: .psql)
   migrations.add(model: Message.self, database: .psql)
+  migrations.add(model: ChatMessage.self, database: .psql)
   migrations.add(model: Token.self, database: .psql)
   migrations.add(model: FavoritedItemsUsersPivot.self, database: .psql)
   migrations.add(model: ResetPasswordToken.self, database: .psql)
