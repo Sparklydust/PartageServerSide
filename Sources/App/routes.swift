@@ -21,9 +21,9 @@ public func routes(_ router: Router) throws {
 }
 
 // Register application's web socket routes here.
-public func socketRoutes(_ socketServer: NIOWebSocketServer) throws {
+public func socketRoutes(_ webSockets: NIOWebSocketServer) throws {
   
-  socketServer.get("echo") { (ws, req) in
+  webSockets.get("echo") { (ws, req) in
     print("ws connected")
     
     ws.onText({ (ws, text) in

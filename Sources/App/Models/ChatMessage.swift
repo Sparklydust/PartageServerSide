@@ -20,6 +20,7 @@ extension ChatMessage: PostgreSQLModel {}
 extension ChatMessage: Content {}
 extension ChatMessage: Parameter {}
 
+//MARK: - Create a foreign key to parent Message
 extension ChatMessage {
   var message: Parent<ChatMessage, Message> {
     return parent(\.messageID)

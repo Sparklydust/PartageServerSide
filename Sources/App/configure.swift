@@ -22,9 +22,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   services.register(router, as: Router.self)
   
   // Register routes to the web socket server
-  let wss = NIOWebSocketServer.default()
-  try socketRoutes(wss)
-  services.register(wss, as: WebSocketServer.self)
+  let webSockets = NIOWebSocketServer.default()
+  try socketRoutes(webSockets)
+  services.register(webSockets, as: WebSocketServer.self)
   
   // Register middleware
   var middlewares = MiddlewareConfig() // Create _empty_ middleware config

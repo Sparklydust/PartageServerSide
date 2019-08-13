@@ -25,23 +25,28 @@ struct UsersController: RouteCollection {
     basicAuthGroup.put("editAccountAndPassord", User.parameter, use: updateUserAndPasswordHandler)
   }
   
+  //MARK: - Create a new user
   func createHandler(_ req: Request, user: User) throws -> Future<User.Public> {
     user.password = try BCrypt.hash(user.password)
     return user.save(on: req).convertToPublic()
   }
   
+  //MASRK: - Get all user in public
   func getAllHandler(_ req: Request) throws -> Future<[User.Public]> {
     return User.query(on: req).decode(data: User.Public.self).all()
   }
   
+  //MARK: - Get one user in public
   func getHandler(_ req: Request) throws -> Future<User.Public> {
     return try req.parameters.next(User.self).convertToPublic()
   }
   
+  //MARK: - Get full user
   func getNonPublicUserHandler(_ req: Request) throws -> Future<User> {
     return try req.parameters.next(User.self)
   }
   
+  //MARK: - Get all items associated to an user
   func getDonatedItemsHandler(_ req: Request) throws -> Future<[DonatedItem]> {
     return try req
       .parameters.next(User.self)
@@ -50,12 +55,14 @@ struct UsersController: RouteCollection {
       })
   }
   
+  //MARK: - User login
   func loginHandler(_ req: Request) throws -> Future<Token> {
     let user = try req.requireAuthenticated(User.self)
     let token = try Token.generate(for: user)
     return token.save(on: req)
   }
   
+  //MARK: - Delete an user
   func deleteHandler(_ req: Request) throws -> Future<HTTPStatus> {
     return try req
       .parameters
@@ -64,6 +71,7 @@ struct UsersController: RouteCollection {
       .transform(to: .noContent)
   }
   
+  //MARK: - Get all items an user favorited
   func getFavoritedItemsHandler(_ req: Request) throws -> Future<[DonatedItem]> {
     return try req.parameters.next(User.self)
       .flatMap(to: [DonatedItem].self, { (user) in
@@ -71,6 +79,7 @@ struct UsersController: RouteCollection {
       })
   }
   
+  //MARK: - Update an user info without password
   func updateUserHandler(_ req: Request) throws -> Future<User> {
     return try flatMap(to: User.self, req.parameters.next(User.self), req.content.decode(UserCreateData.self), { (user, updatedUser) in
       user.firstName = updatedUser.firstName
@@ -81,6 +90,7 @@ struct UsersController: RouteCollection {
     })
   }
   
+  //MARK: - Update user info and password
   func updateUserAndPasswordHandler(_ req: Request) throws -> Future<User> {
     return try flatMap(to: User.self, req.parameters.next(User.self), req.content.decode(UserCreatePasswordData.self), { (user, updatedUser) in
       user.firstName = updatedUser.firstName
@@ -91,11 +101,6 @@ struct UsersController: RouteCollection {
       return user.save(on: req)
     })
   }
-  
-//  func sendProfilePicturehandler(_ req: Request) throws -> EventLoopFuture<File.Response> {
-//    let s3 = try req.makeS3Client()
-//    return try s3.put(string: <#T##String#>, destination: <#T##String#>, on: <#T##Container#>)
-//  }
 }
 
 //MARK: - Defines the request data a user has to send to update his attributes

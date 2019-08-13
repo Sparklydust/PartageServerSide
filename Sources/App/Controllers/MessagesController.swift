@@ -29,8 +29,7 @@ struct MessagesController: RouteCollection {
       senderID: data.senderID,
       recipientID: data.recipientID,
       date: data.date,
-      isReadBySender:
-      data.isReadBySender,
+      isReadBySender: data.isReadBySender,
       isReadByRecipient: data.isReadByRecipient
     )
     return message.save(on: req)

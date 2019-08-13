@@ -21,6 +21,7 @@ final class FavoritedItemsUsersPivot: PostgreSQLUUIDPivot {
 
 extension FavoritedItemsUsersPivot: ModifiablePivot {}
 
+//MARK: - To delete or update an item on cascade
 extension FavoritedItemsUsersPivot: Migration {
   static func prepare(on connection: PostgreSQLConnection) -> Future<Void> {
     return Database.create(self, on: connection, closure: { (builder) in
