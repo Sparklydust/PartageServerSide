@@ -16,6 +16,9 @@ public func routes(_ router: Router) throws {
   let chatMessagesController = ChatMessagesController()
   try router.register(collection: chatMessagesController)
   
+  let deviceTokensController = DeviceTokensController()
+  try router.register(collection: deviceTokensController)
+  
   let websiteController = WebsiteController()
   try router.register(collection: websiteController)
 }
