@@ -35,37 +35,47 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
   // Configure a database
   var databases = DatabasesConfig()
   
-  let hostname = Environment.get("DATABASE_HOSTNAME") ?? "localhost"
-  let username = Environment.get("DATABASE_USER") ?? "Sparklydust"
-  let password = Environment.get("DATABASE_PASSWORD") ?? "E87Lp6y3eMAGbkTBKt9PGwsAi"
-  let databasePort: Int
-  let databaseName: String
+  let databaseConfig: PostgreSQLDatabaseConfig
   
-  if (env == .testing) {
-    databaseName = "PartageServerSide-test"
-    if let testPort = Environment.get("DATABASE_PORT") {
-      databasePort = Int(testPort) ?? 5433
-    }
-    else {
-      databasePort = 5433
-    }
+  if let url = Environment.get("DATABASE_URL") {
+    databaseConfig = PostgreSQLDatabaseConfig(url: url)!
+  }
+  else if let url = Environment.get("DB_POSTGRESQL") {
+    databaseConfig = PostgreSQLDatabaseConfig(url: url)!
   }
   else {
-    databaseName = Environment.get("DATABASE_DB") ?? "PartageServerSide"
-    databasePort = 5432
+    let hostname = Environment.get("DATABASE_HOSTNAME") ?? "localhost"
+    let username = Environment.get("DATABASE_USER") ?? "Sparklydust"
+    let password = Environment.get("DATABASE_PASSWORD") ?? "E87Lp6y3eMAGbkTBKt9PGwsAi"
+    let databasePort: Int
+    let databaseName: String
+    
+    if (env == .testing) {
+      databaseName = "PartageServerSide-test"
+      if let testPort = Environment.get("DATABASE_PORT") {
+        databasePort = Int(testPort) ?? 5433
+      }
+      else {
+        databasePort = 5433
+      }
+    }
+    else {
+      databaseName = Environment.get("DATABASE_DB") ?? "PartageServerSide"
+      databasePort = 5432
+    }
+    
+    // Run the server locally but connected over my local network
+    var serverConfig = NIOServerConfig.default()
+    serverConfig.hostname = "192.168.1.61"
+    services.register(serverConfig)
+    
+    databaseConfig = PostgreSQLDatabaseConfig(hostname: hostname,
+                                              port: databasePort,
+                                              username: username,
+                                              database: databaseName,
+                                              password: password)
   }
   
-  // Run the server locally but connected over my local network
-  var serverConfig = NIOServerConfig.default()
-  serverConfig.hostname = "192.168.1.61"
-  services.register(serverConfig)
-  
-  let databaseConfig = PostgreSQLDatabaseConfig(hostname: hostname,
-                                                port: databasePort,
-                                                username: username,
-                                                database: databaseName,
-                                                password: password
-  )
   let database = PostgreSQLDatabase(config: databaseConfig)
   databases.add(database: database, as: .psql)
   services.register(databases)
