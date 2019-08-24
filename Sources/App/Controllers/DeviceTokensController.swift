@@ -14,7 +14,7 @@ final class DeviceTokensController: RouteCollection {
     return token.save(on: req)
   }
   
-  //MARK: - To remove the token off the database
+  //MARK: - To remove the device token off the database
   func removeDeviceToken(_ req: Request) throws -> Future<HTTPStatus> {
     let tokenStr = try req.parameters.next(String.self)
     return DeviceToken.query(on: req)
